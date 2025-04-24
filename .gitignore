@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Data files
+*.xml
+*.csv
+*.pkl
+
+# R-related
+.Rproj.user
+*.Rproj
+.Rhistory
