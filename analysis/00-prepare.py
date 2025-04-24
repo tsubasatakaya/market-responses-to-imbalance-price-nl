@@ -12,8 +12,8 @@ for path in [output_data_path, output_figure_path, output_table_path, output_mod
     if not os.path.exists(path):
         os.makedirs(path)
 
-start = pendulum.datetime(2021, 1, 1, tz="CET")
-end = pendulum.datetime(2024, 10, 1, tz="CET")
+start = pendulum.datetime(2021, 1, 1, tz="CET").in_timezone("UTC")
+end = pendulum.datetime(2024, 10, 1, tz="CET").in_timezone("UTC")
 
 create_base_15min_data(start, end)
 
