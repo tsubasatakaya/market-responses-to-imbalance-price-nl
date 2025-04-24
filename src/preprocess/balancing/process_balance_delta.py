@@ -7,12 +7,6 @@ calculate activation probabilities, which are applied as weights for aFRR price 
 """
 
 import pendulum
-import polars as pl
-# from src.preprocess.balancing.process_balancing_energy import (
-#     process_activated_afrr,
-#     process_activated_mfrr,
-# )
-
 
 def process_afrr(data, activated_suffix: str, balance_delta_suffix: str):
     """
@@ -25,15 +19,6 @@ def process_afrr(data, activated_suffix: str, balance_delta_suffix: str):
     4. For 2024-05-06, drop all SPs because there is constant -10MW for settled downward aFRR from 16:15 to EOD.
     5. From 2023-10-04 - 2023-10-20 10:45 (exclusive), drop all SPs because balance delta is missing (not clear if the
        market could react as normal).
-
-    Parameters:
-        activated_suffix: str
-          suffix that indicates columns from activated balancing energy
-        balance_delta_suffix: str
-          suffix that indicates columns from balance delta
-
-    Returns:
-        Original pl.DataFrame with "in_sample_afrr_source" column appended
     """
     data = data.with_columns(
         (
