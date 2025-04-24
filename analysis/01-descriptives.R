@@ -1,7 +1,6 @@
 source("src/R/setup.R")
 source("src/R/functions.R")
 
-output_path <- "output/"
 
 #---------------------------------------------------------------------------------
 # Data preparation
