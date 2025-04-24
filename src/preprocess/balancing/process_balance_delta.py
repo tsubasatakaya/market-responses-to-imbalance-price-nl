@@ -8,7 +8,12 @@ calculate activation probabilities, which are applied as weights for aFRR price 
 
 import pendulum
 
-def process_afrr(data, activated_suffix: str, balance_delta_suffix: str):
+
+def process_afrr(
+    data,
+    activated_suffix: str,
+    balance_delta_suffix: str
+):
     """
     Deal with conflicting aFRR volumes and determine in-sample values according to the following steps:
 
