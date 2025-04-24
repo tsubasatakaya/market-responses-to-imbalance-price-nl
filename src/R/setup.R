@@ -2,6 +2,7 @@
 # Path
 #-----------------------------
 data_path <- "analysis/data"
+output_path <- "output"
 
 
 #-----------------------------
