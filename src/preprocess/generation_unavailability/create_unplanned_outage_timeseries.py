@@ -128,14 +128,14 @@ def create_unplanned_outage_15min_timeseries(
             pl.col("IntervalStart")
             .dt.truncate("1m")
             .alias("floored_interval_start"),  # truncate at minutely resolution
-            pl.col("interval_effective_end")
+            pl.col("effective_interval_end")
             .dt.truncate("1m")
             .alias("floored_interval_end"),
         )
         .with_columns(
-            # If the second of interval_effective_end is zero, shift one minute back to get interval start of the minute in which
+            # If the second of effective_interval_end is zero, shift one minute back to get interval start of the minute in which
             # the outage ended.
-            pl.when(pl.col("interval_effective_end").dt.second() == 0)
+            pl.when(pl.col("effective_interval_end").dt.second() == 0)
             .then(pl.col("floored_interval_end") - pl.duration(minutes=1))
             .otherwise("floored_interval_end")
             .alias("floored_interval_end")
