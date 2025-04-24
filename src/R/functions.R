@@ -49,7 +49,6 @@ create_summary_data <- function(data, dv, endo, iv_set, covs) {
 #-----------------------------
 # Data wrangling
 #-----------------------------
-
 impute_null_outlier <- function(df, x, sd) {
   return (
     df |> 
@@ -69,6 +68,48 @@ add_lags <- function(df, vars, lags) {
     df |> 
       mutate(across(all_of(vars), lag_func, .names = "{.col}_lag_{.fn}_sp"))
   )
+}
+
+get_processed_base_data <- function() {
+  base_data <- vroom(file.path(data_path, "base_15min_data.csv")) |> 
+    mutate(delivery_start = with_tz(delivery_start, tzone = "CET")) |> 
+    mutate(across(all_of(c("year", "month", "dow", "hour", "qh")), as.factor)) |>
+    mutate(delivery_start = with_tz(delivery_start, tzone = "UTC"))
+  
+  lag_vars <- c(
+    "regulation_state_2_dummy",
+    "imbalance"
+  )
+  lags <- c(3, 96)
+  
+  imb_data <- base_data |> 
+    # Drop outliers of DV
+    impute_null_outlier(imbalance, sd = 3) |>
+    # Create dummies for regulation state 2 and 1
+    mutate(
+      regulation_state_2_dummy = case_when(regulation_state == 2 ~ 1,
+                                           TRUE ~ 0),
+      regulation_state_pos_dummy = case_when(regulation_state == 1 ~ 1,
+                                             TRUE ~ 0),
+    ) |> 
+    # Drop settlement periods with regulation state 1/-1 with positive/negative imbalance
+    filter((regulation_state_pos_dummy == 1 & imbalance >= 0) |
+             (regulation_state_pos_dummy == 0 & imbalance < 0)) |>
+    # Create interaction of energy price and regulation state
+    mutate(
+      up_price_x_pos_dummy = up_weighted_price * regulation_state_pos_dummy,
+      down_price_x_neg_dummy = down_weighted_price * (1 - regulation_state_pos_dummy)
+    ) |> 
+    # Add lag terms
+    add_lags(lag_vars, lags) |> 
+    # Drop missing values
+    drop_na(any_of(c(dv, endo, iv_set, cov)))
+  
+  
+  imb_data <- imb_data |> 
+    filter(!(regulation_state %in% c(0, 2)))
+  
+  return(imb_data)
 }
 
 
