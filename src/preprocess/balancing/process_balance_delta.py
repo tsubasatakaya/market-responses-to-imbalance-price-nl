@@ -9,7 +9,7 @@ calculate activation probabilities, which are applied as weights for aFRR price 
 import pendulum
 
 
-def process_afrr(
+def _process_afrr(
     data,
     activated_suffix: str,
     balance_delta_suffix: str
@@ -182,7 +182,7 @@ def process_balance_delta(
     # Drop settlement periods with significantly inconsistent aFRR volumes between aggregated balance delta and
     # settled balancing energy. Significant difference is defined as mean difference +/- 3 * SE (symmetric
     # threshold is applied). Drop the entire day if many SPs have significant differences
-    merged = process_afrr(
+    merged = _process_afrr(
         merged_15min_data,
         activated_suffix="settled",
         balance_delta_suffix="balance_delta",
