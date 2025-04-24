@@ -37,6 +37,7 @@ ggsave(file.path(output_path, "figures/imb_isp_point_density_plot.pdf"),
 #-------------------------------------------------------------------------------
 # Descriptive statistics
 #-------------------------------------------------------------------------------
+iv_set <- iv_set[["comb"]]
 selected_covs <- c("da_price",
                    "non_usable_capacity",
                    "solar_forecast_error",
