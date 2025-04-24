@@ -1,0 +1,59 @@
+"""
+Create quarter-hourly timeseries from the following balancing-related data:
+   1. Imbalance settlement price data. Source: tennet.eu
+   2. Settled imbalance volumes data. Source: tennet.eu
+"""
+
+import pendulum
+import polars as pl
+
+
+def create_balancing_15min_timeseries(
+    start: pendulum.datetime,
+    end: pendulum.datetime,
+):
+    # Make full time-series to avoid missing 15min
+    data = pl.DataFrame().with_columns(
+        delivery_start=pl.datetime_range(
+            start=start.in_timezone("UTC"),
+            end=end.in_timezone("UTC"),
+            interval="15m",
+            closed="left",
+        )
+    )
+
+    isp_data = (
+        pl.read_csv(
+            "data/settlement_prices_from_tennet_eu.csv",
+            columns=["delivery_start", "regulation_state", "shortage_imbalance_price"],
+        )
+        .rename({"shortage_imbalance_price": "imbalance_price"})
+        # Convert to datetime
+        .with_columns(pl.col("delivery_start").str.to_datetime())
+    )
+
+    imb_data = (
+        pl.read_csv(
+            "data/settled_imbalance_volumes_from_tennet_eu.csv",
+            columns=["delivery_start", "surplus", "shortage"],
+        )
+        .rename({"shortage_imbalance_price": "imbalance_price"})
+        # Convert to datetime
+        .with_columns(pl.col("delivery_start").str.to_datetime())
+        # Create imbalance variable from surplus and shortage (positive = shortage)
+        .with_columns(
+            pl.when(
+                # sign convention changes at this time
+                pl.col("delivery_start")
+                >= pendulum.datetime(2022, 7, 16, 0, 15, tz="CET").in_timezone("UTC")
+            )
+            .then(pl.col("shortage") - pl.col("surplus"))
+            .otherwise(pl.col("surplus") - pl.col("shortage"))
+            .alias("imbalance")
+        )
+        .with_columns(
+            # Convert kwh to MW
+            (pl.col("imbalance") * 4 / 1000).round(2).alias("imbalance")
+        )
+        .select("delivery_start", "imbalance")
+    )
