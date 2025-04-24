@@ -44,7 +44,11 @@ package.check <- lapply(
 #-----------------------------
 dv <- "imbalance"
 endo <- "imbalance_price"
-iv_set <- c("up_price_x_pos_dummy", "down_price_x_neg_dummy")
+iv_set <- list(
+  "pos" = c("up_weighted_price"),
+  "neg" = c("down_weighted_price"),
+  "comb" = c("up_price_x_pos_dummy", "down_price_x_neg_dummy")
+)
 
 cov <- c(
   "non_usable_capacity",
