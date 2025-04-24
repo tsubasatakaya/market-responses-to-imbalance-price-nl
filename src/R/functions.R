@@ -103,7 +103,7 @@ get_processed_base_data <- function() {
     # Add lag terms
     add_lags(lag_vars, lags) |> 
     # Drop missing values
-    drop_na(any_of(c(dv, endo, iv_set, cov)))
+    drop_na(any_of(c(dv, endo, unname(unlist(iv_set)), cov)))
   
   
   imb_data <- imb_data |> 
