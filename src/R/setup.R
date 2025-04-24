@@ -1,3 +1,12 @@
+#-----------------------------
+# Path
+#-----------------------------
+data_path <- "analysis/data"
+
+
+#-----------------------------
+# Packages
+#-----------------------------
 packages <-  c(
   "broom", 
   "fastDummies",
@@ -28,4 +37,28 @@ package.check <- lapply(
   }
 )
 
-data_path <- "analysis/data"
+
+#-----------------------------
+# Common variable config
+#-----------------------------
+dv <- "imbalance"
+endo <- "imbalance_price"
+iv_set <- c("up_price_x_pos_dummy", "down_price_x_neg_dummy")
+
+cov <- c(
+  "non_usable_capacity",
+  "da_price",
+  "solar_forecast_error",
+  "wind_forecast_error",
+  "load_forecast_error",
+  "imbalance_price_lag_3_sp",
+  "imbalance_lag_3_sp",
+  "imbalance_price_lag_96_sp",
+  "imbalance_lag_96_sp",
+  "regulation_state_2_dummy_lag_3_sp",
+  "month",
+  "holiday",
+  "dow",
+  "hour",
+  "qh"
+)
