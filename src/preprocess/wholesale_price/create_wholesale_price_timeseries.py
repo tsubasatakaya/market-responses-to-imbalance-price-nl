@@ -13,8 +13,8 @@ def create_wholesale_price_timeseries(
     # Make full time-series to avoid missing 15min
     data = pl.DataFrame().with_columns(
         delivery_start=pl.datetime_range(
-            start=start.in_timezone("UTC"),
-            end=end.in_timezone("UTC"),
+            start=start,
+            end=end,
             interval="15m",
             closed="left",
         )
