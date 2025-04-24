@@ -166,44 +166,45 @@ def process_balance_delta(
         )
     )
 
-    merged_15min_data = (data
-                         .join(
-        be_data,
-        on="delivery_start",
-        how="left",
-        validate="1:1")
-                         .join(
-        (
-            balance_delta_data
-            # Aggregate to 15min
-            .group_by_dynamic("delivery_start", every="15m", closed="left").agg(
-                pl.exclude("datetime").mean().round(3),
-            )
-        ),
-        on="delivery_start",
-        how="left",
-        validate="1:1")
-                         .with_columns(
+    merged_15min_data = (
+        data.join(be_data, on="delivery_start", how="left", validate="1:1")
+        .join(
+            (
+                balance_delta_data
+                # Aggregate to 15min
+                .group_by_dynamic("delivery_start", every="15m", closed="left").agg(
+                    pl.exclude("datetime").mean().round(3),
+                )
+            ),
+            on="delivery_start",
+            how="left",
+            validate="1:1",
+        )
+        .with_columns(
             pl.col("delivery_start")
             .dt.convert_time_zone("CET")
             .dt.date()
             .alias("delivery_day_cet")
-        ))
-
+        )
+    )
 
     # Process aFRR
     # Drop settlement periods with significantly inconsistent aFRR volumes between aggregated balance delta and
     # settled balancing energy. Significant difference is defined as mean difference +/- 3 * SE (symmetric
     # threshold is applied). Drop the entire day if many SPs have significant differences
     merged = process_afrr(
-        merged_15min_data, activated_suffix="settled", balance_delta_suffix="balance_delta"
+        merged_15min_data,
+        activated_suffix="settled",
+        balance_delta_suffix="balance_delta",
     )
 
     # Processed balance delta
-    balance_delta_processed = balance_delta_data.join(merged["delivery_start", "in_sample_afrr_source"],
-                                                      on="delivery_start",
-                                                      how="left",
-                                                      validate="m:1",)
+    balance_delta_processed = balance_delta_data.join(
+        merged["delivery_start", "in_sample_afrr_source"],
+        on="delivery_start",
+        how="left",
+        validate="m:1",
+    )
 
     return balance_delta_processed
 
