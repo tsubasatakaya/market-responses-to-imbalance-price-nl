@@ -30,6 +30,12 @@ def create_balancing_15min_timeseries(
         .rename({"shortage_imbalance_price": "imbalance_price"})
         # Convert to datetime
         .with_columns(pl.col("delivery_start").str.to_datetime())
+        # Filter by datetime range
+        .filter(
+            pl.col("delivery_start").is_between(
+                lower_bound=start, upper_bound=end, closed="left"
+            )
+        )
     )
 
     imb_data = (
@@ -37,9 +43,14 @@ def create_balancing_15min_timeseries(
             "data/settled_imbalance_volumes_from_tennet_eu.csv",
             columns=["delivery_start", "surplus", "shortage"],
         )
-        .rename({"shortage_imbalance_price": "imbalance_price"})
         # Convert to datetime
         .with_columns(pl.col("delivery_start").str.to_datetime())
+        # Filter by datetime range
+        .filter(
+            pl.col("delivery_start").is_between(
+                lower_bound=start, upper_bound=end, closed="left"
+            )
+        )
         # Create imbalance variable from surplus and shortage (positive = shortage)
         .with_columns(
             pl.when(
@@ -57,3 +68,26 @@ def create_balancing_15min_timeseries(
         )
         .select("delivery_start", "imbalance")
     )
+
+    merged = (
+        data.join(
+            isp_data,
+            on="delivery_start",
+            how="left",
+            validate="1:1",
+        )
+        .join(
+            imb_data,
+            on="delivery_start",
+            how="left",
+            validate="1:1",
+        )
+        .with_columns(
+            pl.col("delivery_start")
+            .dt.convert_time_zone("CET")
+            .dt.date()
+            .alias("delivery_day_cet")
+        )
+    )
+
+    return merged
