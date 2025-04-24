@@ -7,6 +7,7 @@ calculate activation probabilities, which are applied as weights for aFRR price 
 """
 
 import pendulum
+import polars as pl
 
 
 def _process_afrr(
