@@ -54,6 +54,8 @@ def create_wholesale_price_timeseries(
     merged = (data
               .join(
         da_data, on="delivery_start", how="left", validate="1:1")
+              .with_columns(
+        pl.col("da_price").mean().over(pl.col("delivery_start").dt.truncate("1h")))
               .join(
         idc_data, on="delivery_start", how="left", validate="1:1")
               )
