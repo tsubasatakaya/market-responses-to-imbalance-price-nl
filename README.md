@@ -16,3 +16,5 @@ The main folder is `analysis`, where all the scripts relevant to the analysis ar
 - `05-intraday_iv.R`: Run 2SLS on the ID traded volumes (R).
 - `06-other_appendix_plots.R`: Generate other supplementary plots, namely the trend of ID1 traded volumes and partial autocorrelation functions of key variables (R).
 - `07-afrr_proxy_example.R`: Create plots to explain how the aFRR price proxy is constructed.
+
+  The original data set is currently not made public (as of 25.04.2025), as I am asking for consent of the private data provider.
