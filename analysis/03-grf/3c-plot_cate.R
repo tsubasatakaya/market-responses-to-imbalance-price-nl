@@ -1,7 +1,6 @@
 source("src/R/setup.R")
 source("src/R/functions.R")
 
-# model_save_path <- file.path(output_path, "models", "grf")
 data_save_path <- file.path(output_path, "data", "grf")
 
 #-------------------------------------------------------------------------------
