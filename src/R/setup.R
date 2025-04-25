@@ -13,6 +13,7 @@ packages <-  c(
   "fastDummies",
   "fixest", 
   "forcats",
+  "forecast",
   "ggplot2",
   "ggpointdensity",
   "glue",
