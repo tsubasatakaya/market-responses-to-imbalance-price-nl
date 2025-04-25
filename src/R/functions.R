@@ -189,3 +189,27 @@ create_marginal_df <- function(X_orig,
   }
   return(res)
 }
+
+plot_2d_density_scatter <- function(plot_df, x, y, 
+                                    xlab = NULL, 
+                                    ylab = NULL, 
+                                    title = NULL,
+                                    xlim = NULL, 
+                                    ylim = NULL) {
+  density_scatter <- ggplot(plot_df, aes(x = !!sym(x), y = !!sym(y))) +
+    geom_pointdensity(size = 0.5) +
+    scale_color_viridis(name = "Number of neighbors") +
+    labs(x = xlab, y = ylab, title = title) +
+    theme_bw() +
+    theme_custom() +
+    theme(legend.position = "bottom")
+  
+  if (!is.null(xlim)) {
+    density_scatter <- density_scatter + xlim(xlim)
+  }
+  if (!is.null(ylim)) {
+    density_scatter <- density_scatter + ylim(ylim)
+  }
+  
+  return(density_scatter)
+}
