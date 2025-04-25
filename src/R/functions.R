@@ -190,6 +190,48 @@ create_marginal_df <- function(X_orig,
   return(res)
 }
 
+plot_cate_facet <- function(plot_df, 
+                            continuous_col, 
+                            discrete_col,
+                            discrete_quantiles,
+                            color, 
+                            discrete_col_label,
+                            discrete_col_unit) {
+  quantile_vals <- plot_df |> 
+    filter(quantile %in% discrete_quantiles) |> 
+    distinct(quantile, !!sym(discrete_col)) |> 
+    arrange(quantile) |> 
+    pull(!!sym(discrete_col)) |> 
+    round(2)
+  
+  quantile_labels <- setNames(
+    paste0(discrete_col_label, 
+           " at ", 
+           scales::percent(discrete_quantiles), 
+           " quantile (", 
+           quantile_vals, 
+           " ", 
+           discrete_col_unit, 
+           ")"),
+    as.character(discrete_quantiles)  # Name the quantiles as 0.1 and 0.9 or any others in discrete_quantiles
+  )
+  
+  cate_plot <- plot_df |> 
+    ggplot(aes(x = !!sym(continuous_col), y = tau_hat)) +
+    geom_line(linewidth = 1, color = color) +
+    geom_line(aes(y = upper), linetype = "dotted", linewidth = 1.2, color = color) +
+    geom_line(aes(y = lower), linetype = "dotted", linewidth = 1.2, color = color) +
+    geom_hline(yintercept = 0, color = "black") +
+    facet_wrap(~ quantile,
+               labeller = labeller(
+                 quantile = quantile_labels
+               )) +
+    theme_bw() +
+    theme_custom()
+  
+  return(cate_plot)
+}
+
 plot_2d_density_scatter <- function(plot_df, x, y, 
                                     xlab = NULL, 
                                     ylab = NULL, 
