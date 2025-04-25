@@ -148,3 +148,44 @@ bulk_fit_iv_linear <- function(data, config_list) {
   
   return(res)
 }
+
+
+#-----------------------------
+# GRF
+#-----------------------------
+get_nearest_value <- function(x, values) {
+  values <- unique(values)
+  val <- values[which.min(abs(x - values))]
+  return(val)
+}
+
+get_discrete_test_values <- function(X_orig, test_df, discrete_col, quantiles) {
+  # Extract values of discrete_col corresponding to each quantile from X_orig (train data)
+  fix_col_quantiles <- quantile(X_orig |> pull(any_of(c(discrete_col))),
+                                quantiles)
+  # Get values from test_df that are closest to each quantile value
+  fix_col_test_vals <- map_dbl(unname(fix_col_quantiles),
+                               ~ get_nearest_value(.x, 
+                                                   test_df |> 
+                                                     pull(any_of(c(discrete_col)))))
+  return(fix_col_test_vals)
+}
+
+create_marginal_df <- function(X_orig, 
+                               test_df, 
+                               discrete_col, 
+                               quantiles) {
+  
+  discrete_vals <- get_discrete_test_values(X_orig, test_df, discrete_col, quantiles)
+  print(setNames(discrete_vals, quantiles))
+  
+  res <- tibble()
+  for (i in seq_along(quantiles)) {
+    marginal_df <- test_df |> 
+      filter(!!sym(discrete_col) == discrete_vals[i]) |> 
+      mutate(quantile = quantiles[i])
+    
+    res <- bind_rows(res, marginal_df)
+  }
+  return(res)
+}
