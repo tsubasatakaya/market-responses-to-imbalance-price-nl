@@ -93,8 +93,49 @@ modelsummary(iv_linear_res_by_year,
   gtsave("iv_linear_id1_qh_vol_by_year_summary.tex", path = file.path(output_path, "tables"))
 
 
+#-------------------------------------------------------------------------------
+# Plot coefficients
+#-------------------------------------------------------------------------------
+coef_by_year <- tibble()
+for (i in seq_along(iv_linear_res_by_year)) {
+  df <- tidy(iv_linear_res_by_year[[i]], conf.int = TRUE) |> 
+    filter(str_detect(term, paste0("fit_", endo))) |> 
+    mutate(direction = direc_by_year[i],
+           year = rep(years, each = 2)[i])
+  coef_by_year <- coef_by_year |> 
+    bind_rows(df)
+}
 
+coef_plot_by_year <- coef_by_year |> 
+  mutate(direction = factor(direction, levels = c("pos", "neg"))) |> 
+  ggplot(aes(x = year, ymin = conf.low, ymax = conf.high)) + 
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") + 
+  geom_linerange(aes(col = direction), linewidth = 1, 
+                 position = position_dodge(width = 0.2)) +
+  geom_point(aes(x = year, y = estimate, col = direction), size = 3,
+             position = position_dodge(width = 0.2)) + 
+  scale_color_manual(name = "",
+                     values = c("pos" = "#E76F51",
+                                "neg" = "#2A9D8F"),
+                     labels = c("Short", "Long")) +
+  labs(x = "",
+       y = "Effect of imbalance price on traded volumes (MW per €/MWh)") +
+  theme_bw() +
+  theme_custom() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 12),
+    legend.margin = margin(1, 3, 3, 3),
+    axis.title = element_text(size = 14),
+    axis.title.x = element_blank(),
+    axis.text = element_text(size = 12),
+    plot.margin = margin(10, 10, 10, 10)
+  )
 
+ggsave(file.path(output_path, "figures/iv_linear_id1_qh_vol_coef_by_year.pdf"),
+       coef_plot_by_year, width = 8, height = 6, 
+       units = "in", dpi = 150, useDingbats = TRUE)
 
 
 
